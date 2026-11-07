@@ -5,8 +5,9 @@ from torchvision import transforms, models
 from PIL import Image
 import numpy as np
 import joblib
-import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 import os
+import zipfile
 
 # ==========================================
 # 1. KONFIGURASI HALAMAN
@@ -44,9 +45,14 @@ def load_feature_extractors():
 
 @st.cache_resource
 def load_ml_pipeline_v3():
-    # Memuat file langsung dari root folder proyek (tempat app.py berada)
     scaler = joblib.load('scaler_weighted_ensemble_v3.pkl')
     pca = joblib.load('pca_1024_v3.pkl')
+    
+    # Ekstrak berkas zip SVM jika berkas .pkl langsung belum ada di folder
+    if os.path.exists('svm_classifier_v3.zip') and not os.path.exists('svm_classifier_v3.pkl'):
+        with zipfile.ZipFile('svm_classifier_v3.zip', 'r') as zip_ref:
+            zip_ref.extractall('.')
+            
     svm = joblib.load('svm_classifier_v3.pkl')
     w_res, w_eff = np.load('best_ratio.npy')
     class_names = ['defect', 'longberry', 'peaberry', 'premium']
@@ -113,24 +119,27 @@ if uploaded_file is not None:
     
     st.subheader("Distribusi Probabilitas Klasifikasi Per Kelas:")
     
-    fig = go.Figure(go.Bar(
-        x=[p * 100 for p in probabilities],
-        y=[c.capitalize() for c in class_names],
-        orientation='h',
-        text=[f"{p * 100:.2f}%" for p in probabilities],
-        textposition='auto',
-        marker_color=['#1f77b4' if i != prediction_idx else '#2ca02c' for i in range(len(class_names))]
-    ))
+    # Chart Horizontal menggunakan Matplotlib
+    fig, ax = plt.subplots(figsize=(8, 3.5))
+    y_pos = np.arange(len(class_names))
+    prob_percent = probabilities * 100
     
-    fig.update_layout(
-        xaxis_title="Probabilitas Terkalibrasi (%)",
-        yaxis_title="Kelas Biji Kopi",
-        xaxis=dict(range=[0, 100]),
-        height=320,
-        margin=dict(l=20, r=20, t=20, b=20)
-    )
+    colors = ['#1f77b4' if i != prediction_idx else '#2ca02c' for i in range(len(class_names))]
+    bars = ax.barh(y_pos, prob_percent, align='center', color=colors)
     
-    st.plotly_chart(fig, use_container_width=True)
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels([c.capitalize() for c in class_names], fontsize=11)
+    ax.invert_yaxis()
+    ax.set_xlabel('Probabilitas Terkalibrasi (%)', fontsize=11)
+    ax.set_xlim(0, 100)
+    
+    for bar in bars:
+        width = bar.get_width()
+        ax.text(width + 1, bar.get_y() + bar.get_height()/2, f'{width:.2f}%',
+                ha='left', va='center', fontsize=10, fontweight='bold')
+    
+    plt.tight_layout()
+    st.pyplot(fig)
     
     with st.expander("Lihat Rincian Probabilitas Numerik"):
         prob_df = {
