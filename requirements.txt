@@ -1,8 +1,8 @@
-
 streamlit
 torch
 torchvision
-scikit-learn
-joblib
-numpy
 pillow
+numpy
+joblib
+scikit-learn
+matplotlib
