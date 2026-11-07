@@ -10,7 +10,7 @@ import os
 import zipfile
 
 # ==========================================
-# 1. KONFIGURASI HALAMAN & CUSTOM CSS TEMA KOPI
+# 1. KONFIGURASI HALAMAN & FULL AESTHETIC COFFEE CSS
 # ==========================================
 st.set_page_config(
     page_title="Arabica Bean Quality Evaluator",
@@ -18,79 +18,105 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom Styling (Theme: Warm Coffee & Cream)
+# Styling Aesthetic Coffee Mix (Dark Espresso + Warm Cream)
 st.markdown("""
 <style>
-    /* Background Utama & Font Base */
+    /* Background Utama Seluruh Web */
     .stApp {
-        background-color: #FAF6F0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #F7F3E9;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
     }
     
     /* Header Utama */
     .main-header {
-        color: #3C2A21;
+        color: #2C1810;
         text-align: center;
-        font-weight: 700;
-        padding-bottom: 5px;
-        margin-bottom: 0px;
+        font-weight: 800;
+        font-size: 2.3rem;
+        margin-bottom: 5px;
+        letter-spacing: -0.5px;
     }
     
     .sub-header {
-        color: #6E5343;
+        color: #6F4E37;
         text-align: center;
-        font-size: 1.1rem;
+        font-size: 1.05rem;
+        font-weight: 500;
         margin-bottom: 25px;
     }
 
-    /* Card Hasil Prediksi */
-    .metric-card-success {
-        background-color: #E8F5E9;
-        border-left: 6px solid #2E7D32;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    /* Card Hasil Prediksi Aesthetic */
+    .metric-card-primary {
+        background: linear-gradient(135deg, #3C2A21 0%, #1A0C06 100%);
+        padding: 18px 20px;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(44, 24, 16, 0.15);
+        color: #FAF6F0;
+        border: 1px solid #5C3D2E;
     }
     
-    .metric-card-info {
-        background-color: #E3F2FD;
-        border-left: 6px solid #1565C0;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    .metric-card-secondary {
+        background: linear-gradient(135deg, #E5D9B6 0%, #D5CEA3 100%);
+        padding: 18px 20px;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(44, 24, 16, 0.08);
+        color: #2C1810;
+        border: 1px solid #B8AC86;
     }
     
-    .card-title {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #555555;
-        margin-bottom: 5px;
-    }
-    
-    .card-value {
-        font-size: 1.8rem;
+    .card-title-light {
+        font-size: 0.82rem;
         font-weight: 700;
-        color: #111111;
+        color: #D5CEA3;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
     }
     
-    /* Uploader Box */
-    .stFileUploader > div {
-        border: 2px dashed #D5CEA3;
-        background-color: #FFFFFF;
-        border-radius: 10px;
+    .card-title-dark {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #6F4E37;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
     }
+    
+    .card-value-light {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: #FFFFFF;
+    }
+    
+    .card-value-dark {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: #2C1810;
+    }
+
+    /* Uploader Dropzone Aesthetic */
+    [data-testid="stFileUploader"] {
+        background-color: #FFFFFF;
+        border: 2px dashed #B8AC86;
+        border-radius: 16px;
+        padding: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    
+    /* Tombol & Expander Styling */
+    .streamlit-expanderHeader {
+        background-color: #EFE6D5 !important;
+        color: #2C1810 !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Sembunyikan Header Streamlit Bawaan */
+    header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# Header Aplikasi
+# Header Aplikasi Ramping & Aesthetic
 st.markdown("<h1 class='main-header'>☕ Arabica Bean Quality Evaluator</h1>", unsafe_allow_html=True)
-st.markdown("<p class='sub-header'>Sistem Pakar Evaluasi Mutu Biji Kopi Arabika • <b>Dataset USK-Coffee</b></p>", unsafe_allow_html=True)
-
-st.markdown("""
-<div style='background-color: #FFF8EA; padding: 12px 18px; border-radius: 8px; border: 1px solid #E5D9B6; font-size: 0.92rem; color: #574B90; margin-bottom: 20px;'>
-<b>Metode AI:</b> Ensemble Deep Feature Extraction (<i>ResNet50 + EfficientNetB0</i>) dengan pembobotan optimal $64\%:36\%$, <i>PCA 1024 Komponen</i>, serta <i>Support Vector Machine (SVM RBF)</i> terkalibrasi probabilitas.
-</div>
-""", unsafe_allow_html=True)
+st.markdown("<p class='sub-header'>Sistem Evaluasi & Klasifikasi Mutu Biji Kopi Arabika • <b>Dataset USK-Coffee</b></p>", unsafe_allow_html=True)
 
 # ==========================================
 # 2. PEMUATAN MODEL ARTEFAK (MODEL V3)
@@ -127,7 +153,7 @@ def load_ml_pipeline_v3():
     
     return scaler, pca, svm, w_res, w_eff, class_names
 
-with st.spinner("Memuat arsitektur AI dan bobot model v3 teroptimasi..."):
+with st.spinner("Memuat model AI teroptimasi..."):
     resnet_model, effnet_model, device = load_feature_extractors()
     scaler, pca, svm_model, w_res, w_eff, class_names = load_ml_pipeline_v3()
 
@@ -180,61 +206,60 @@ if uploaded_file is not None:
     # 4. VISUALISASI HASIL PREDIKSI & METRIK
     # ==========================================
     st.write("---")
-    st.markdown("<h3 style='color: #3C2A21; text-align: center;'>Hasil Evaluasi Mutu Biji Kopi</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #2C1810; text-align: center; font-weight: 700;'>Hasil Evaluasi Mutu Biji Kopi</h3>", unsafe_allow_html=True)
     st.write("")
     
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"""
-        <div class="metric-card-success">
-            <div class="card-title">KELAS TERPREDIKSI</div>
-            <div class="card-value" style="color: #2E7D32;">{predicted_class.upper()}</div>
+        <div class="metric-card-primary">
+            <div class="card-title-light">KELAS TERPREDIKSI</div>
+            <div class="card-value-light">{predicted_class.upper()}</div>
         </div>
         """, unsafe_allow_html=True)
         
     with col2:
         st.markdown(f"""
-        <div class="metric-card-info">
-            <div class="card-title">TINGKAT KEYAKINAN (CONFIDENCE)</div>
-            <div class="card-value" style="color: #1565C0;">{max_prob:.2f}%</div>
+        <div class="metric-card-secondary">
+            <div class="card-title-dark">CONFIDENCE SCORE</div>
+            <div class="card-value-dark">{max_prob:.2f}%</div>
         </div>
         """, unsafe_allow_html=True)
     
     st.write("")
-    st.markdown("<h4 style='color: #6E5343;'>Distribusi Probabilitas Terkalibrasi Per Kelas:</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color: #6F4E37; font-weight: 600;'>Distribusi Probabilitas Klasifikasi Per Kelas:</h4>", unsafe_allow_html=True)
     
-    # Custom Palette Warm Coffee Gradient
+    # Palette Warna Cokelat Aesthetic
     bar_colors = []
     for i in range(len(class_names)):
         if i == prediction_idx:
-            bar_colors.append('#3C2A21') # Espresso / Winner Class
+            bar_colors.append('#3C2A21') # Espresso Pekat untuk Kelas Pemenang
         else:
-            bar_colors.append('#D5CEA3') # Light Cream
+            bar_colors.append('#C5A880') # Soft Milk Coffee
             
     fig, ax = plt.subplots(figsize=(8, 3.2))
-    fig.patch.set_facecolor('#FAF6F0')
-    ax.set_facecolor('#FAF6F0')
+    fig.patch.set_facecolor('#F7F3E9')
+    ax.set_facecolor('#F7F3E9')
     
     y_pos = np.arange(len(class_names))
     prob_percent = probabilities * 100
     
-    bars = ax.barh(y_pos, prob_percent, align='center', color=bar_colors, edgecolor='#3C2A21', linewidth=0.8)
+    bars = ax.barh(y_pos, prob_percent, align='center', color=bar_colors, edgecolor='#2C1810', linewidth=0.8)
     
     ax.set_yticks(y_pos)
-    ax.set_yticklabels([c.capitalize() for c in class_names], fontsize=11, fontweight='bold', color='#3C2A21')
+    ax.set_yticklabels([c.capitalize() for c in class_names], fontsize=11, fontweight='bold', color='#2C1810')
     ax.invert_yaxis()
-    ax.set_xlabel('Probabilitas Terkalibrasi (%)', fontsize=10, fontweight='bold', color='#3C2A21')
+    ax.set_xlabel('Probabilitas Terkalibrasi (%)', fontsize=10, fontweight='bold', color='#2C1810')
     ax.set_xlim(0, 105)
     
-    # Hilangkan border kotak atas & kanan grafik
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_color('#3C2A21')
-    ax.spines['bottom'].set_color('#3C2A21')
+    ax.spines['left'].set_color('#2C1810')
+    ax.spines['bottom'].set_color('#2C1810')
     
     for bar in bars:
         width = bar.get_width()
-        txt_color = '#3C2A21' if width < 80 else '#FFFFFF'
+        txt_color = '#2C1810' if width < 80 else '#FFFFFF'
         x_pos_text = width + 1.5 if width < 80 else width - 12
         ax.text(x_pos_text, bar.get_y() + bar.get_height()/2, f'{width:.2f}%',
                 ha='left' if width < 80 else 'right', va='center', 
